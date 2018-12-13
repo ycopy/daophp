@@ -1,0 +1,25 @@
+<?php
+if(!defined('_DPEXEC_')) {
+	header("Location: /index.php",TRUE,301);
+}
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<title><?php echo $this->title ;?></title>
+<meta name="layout" content="hello" />
+<meta name="title" content="<?php echo $this->title; ?>" />
+<meta name="keywords" content="<?php echo $this->keywords; ?>" />
+<meta name="description" content="<?php echo $this->description; ?>" />
+<?php if(!empty( $this->headers )):?>
+<?php echo $this->headers ;?>
+<?php endif;?>
+</head>
+<body>
+	<div id="daophp">
+		<?php echo $this->content; ?>
+	</div>
+</body>
+</html>
