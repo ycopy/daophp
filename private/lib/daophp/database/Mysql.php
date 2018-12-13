@@ -70,25 +70,21 @@ final class Mysql implements DBI,Resource {
 	 */
 	public function desc($tableName) {
 	    
-		if (empty ( $tableName )) {
+		if (empty ($tableName)) {
 			throw new DBNullTableNameException ();
 		}
 
+		$rows = array();
 		try {
 		    $desc = 'DESC `'. $tableName . '`' ;
 		    Debug::core('sql: '. $desc );
 		    
-		    $this->query ( $desc ) ;
-		    
-		 	$rs = $this->getAll ( MYSQLI_ASSOC );
+		    $this->query ( $desc ) ;		    
+		 	$rows = $this->getAll (MYSQLI_ASSOC);
 		} catch ( \Exception $e ) {
-			Debug::exception( $e );
-			return false;
-		}
- 
-		//var_dump( $rs );
-		
-		return $rs;
+			throw $e;
+		}	
+		return $rows;
 	}
 
 	private $SQL = array ();
@@ -99,12 +95,13 @@ final class Mysql implements DBI,Resource {
 	/* (non-PHPdoc)
 	 * @see DBI::getDBlink()
 	 */
-	public function getDBlink() {
+	public function getDbLink() {
 		// TODO Auto-generated method stub
 		if( $this->dbLink== null ) {
 			$this->connect();
 		}
-
+		
+		assert( is_resource($this->dbLink));		
 		return $this->dbLink ;
 	}
 
@@ -203,7 +200,8 @@ final class Mysql implements DBI,Resource {
 		if( !$this->query( $auto_commit_query ) ) {
 		    throw new DBException('init autoCommit to false error');
 		}
-
+		
+		assert( $this->dbLink != null );
 		return $this->dbLink;
 	}
 
@@ -233,8 +231,6 @@ final class Mysql implements DBI,Resource {
 		if ( ! $this->dbResult instanceof \mysqli_result ) {		    
 		    return true;		    
 		}
-		
-		//var_dump( $this->dbResult );
 		
 		if(mysqli_free_result ( $this->dbResult )) {
 			$this->dbResult = null ;
@@ -290,7 +286,6 @@ final class Mysql implements DBI,Resource {
 	 */
 	public function getAll($type = MYSQLI_ASSOC ) {	    
 	    
-	    //var_dump( $this->dbResult );
 	    if ( !$this->dbResult instanceof \mysqli_result ) {
 	        throw new DBInvalidResultException();
 	    }
@@ -300,8 +295,6 @@ final class Mysql implements DBI,Resource {
 		while ( ( $tmp = mysqli_fetch_array($this->dbResult, $type)) != NULL ) {
 			array_push( $rows, $tmp );
 		}	
-		
-		//var_dump( $rows );
 		
 		return $rows;
 	}
@@ -430,9 +423,9 @@ final class Mysql implements DBI,Resource {
 				case 1062:
 				    throw new DBDuplicateEntryException($sql,$errstr);
 				case 1114:
-				    throw new DBTableIsFullException( $errstr);
+				    throw new DBTableIsFullException($errstr);
 				case 1146:
-				    throw new DBTableNotFoundException( $errstr);
+				    throw new DBTableNotFoundException($errstr);
 				case 2006:
 					throw new DBDownException($this->dbHost);
 				case 1205:
@@ -448,8 +441,9 @@ final class Mysql implements DBI,Resource {
 				}
 			}
 		}
-
-		return $this->dbResult;
+		
+		assert($this->dbResult !== false);
+		return true;
 	}
 
 	/**
@@ -493,8 +487,8 @@ final class Mysql implements DBI,Resource {
 					$rs = $this->query('SET AUTOCOMMIT=0;');
 				}
 			} catch( \Exception $e){
-				Debug::addException($e);
-				$rs = false;
+				Debug::exception($e);
+				throw $e;
 			}
 
 			if( $rs ) {

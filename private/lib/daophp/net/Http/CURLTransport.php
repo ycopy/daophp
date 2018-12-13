@@ -1,6 +1,6 @@
 <?php
 
-namespace daophp\net\Http ;
+namespace daophp\net\http ;
 
 class CURLTransport implements HTTPTransport {
 

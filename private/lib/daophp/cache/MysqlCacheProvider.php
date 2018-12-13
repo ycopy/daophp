@@ -38,7 +38,7 @@ class MysqlCacheProvider implements CacheProvider {
 		} catch( DBConnectException $e ) {
 			throw $e;
 		} catch ( \Exception $e ) {
-			Debug::addException($e);
+			Debug::exception($e);
 			return false;
 		}
 		
@@ -88,7 +88,7 @@ class MysqlCacheProvider implements CacheProvider {
 		} catch( DBConnectException $e ) {
 			throw $e;
 		} catch ( \Exception $e ) {
-			Debug::addException($e);
+			Debug::exception($e);
 		}
 		return null;
 	}
@@ -141,10 +141,10 @@ class MysqlCacheProvider implements CacheProvider {
 			throw $e;
 		} catch( DBTableIsFullException $e ){
 			$this->notifyFull();
-			Debug::addException($e);
+			Debug::exception($e);
 			return false ;
 		} catch ( \Exception $e ) {
-			Debug::addException($e);
+			Debug::exception($e);
 			return false;
 		}
 	}

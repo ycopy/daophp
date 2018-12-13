@@ -415,7 +415,7 @@ class RedisCacheProvider extends SingletonObject implements CacheProvider, ListC
 		try {
 			$rs = self::$redis->ping();
 		} catch (\Exception $e) {
-			Debug::addException($e);
+			Debug::exception($e);
 			return false;
 		}
 		
@@ -455,7 +455,7 @@ class RedisCacheProvider extends SingletonObject implements CacheProvider, ListC
 			try {
 				$connect = self::$redis->connect(self::$host,self::$port);//please dont set time out here...for win ,if has a timeout ,don not know localhost, only recoginize 127.0.0.1
 			} catch( \RedisException $e ) {
-				Debug::addException($e);
+				Debug::exception($e);
 			}
 			usleep(50*$try++) ;
 		} while ( $connect !== true && $try < 3 );
@@ -475,7 +475,7 @@ class RedisCacheProvider extends SingletonObject implements CacheProvider, ListC
 			try {
 				$rs = self::$redis->close() ;
 			} catch( \Exception $e) {
-				Debug::addException($e);
+				Debug::exception($e);
 			}
 			self::$redis = null;
 		}

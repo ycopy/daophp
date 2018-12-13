@@ -51,11 +51,11 @@ final class CacheManager extends SingletonObject {
 					break;
 			}
 		}catch( MemCacheConnectException $e ) {
-			Debug::addException($e) ;
+			Debug::exception($e) ;
 			DaoPHP::$useCache = false;//disable for connection errorf
 			return null;
 		} catch( \Exception $e ) {
-			Debug::addException($e) ;
+			Debug::exception($e) ;
 			return null;
 		}
 	}

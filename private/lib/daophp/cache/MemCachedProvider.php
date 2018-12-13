@@ -95,7 +95,7 @@ class MemCachedProvider extends SingletonObject implements CacheProvider,Resourc
 			}			
 		} catch (ClassNotFoundException $e) {
 			self::$memcached = null;
-			Debug::addException($e) ;
+			Debug::exception($e) ;
 			return null;
 		}
 		self::$memcached->setOption(\Memcached::OPT_HASH, \Memcached::HASH_CRC);

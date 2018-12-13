@@ -1122,13 +1122,13 @@ EOM;
 	public static function getByID( $id ) {
 		
 		if(empty($id) || intval($id) < 0) {
-			return null;
+			throw new DBInvalidIdException();
 		}
 		
 		return self::findOne( array('id' => $id ), array() ,true );
 	}
 	
-	public function reload( $reload_cda = array(), $reloadField = '' ) {
+	public function reload( $reload_cda = array(), $reload_fields = array() ) {
 
 	    if( !count( $reload_cda) ) {
 	        $reload_cda = $this->_get_primary_key_cda() ;
@@ -1150,36 +1150,41 @@ EOM;
 		}
 		
 		$tmp_obj = self::findOne( $reload_cda);
-
-		if( !$tmp_obj ) {
+		if( $tmp_obj === null ) {
 			//flag the object abnormal
 			$this->updateStatus( self::STATUS_ABNOMAL );
 			throw new DBObjectReloadException($this, new \Exception('reload object failed') );
 		}
-		
+		$rt = false;
 		$this->beginPullFromDB ();		
 		if( empty($reloadField) ) {
-			$result = ( bool ) $this->initByObject ( $tmp_obj->getObject() );
-		} else {
-			$result = $this->set($reloadField, $tmp_obj->get($reloadField));
+			$rt = ( bool ) $this->initByObject ( $tmp_obj->getObject() );
+		} else {			
+			foreach( $reload_fields as $field ) {
+				$rt = $this->set($field, $tmp_obj->get($field));
+				if($rt === false ) {
+					Debug::error( 'SET FIELD: ' . $field . 'FAILED' );						
+					return false;					
+				}
+			}
 		}		
 		$tmp_obj = null ;
 		$this->endPullFromDB ();
 
-		return $result;
+		return $rt;
 	}
 
-	public static function hasAny(array $CDAArray = array()) {
+	public static function hasAny(array $cda = array()) {
 
-		if (! is_array ( $CDAArray ) ) {
+		if (! is_array ( $cda ) ) {
 			Debug::warning ( 'PROVIDED PARAMS MUST BE ARRAY OR OBJECT IN: ' . __METHOD__ );
 			return false;
 		}
 
-		$count = count ( self::find ( $CDAArray ) );
+		$count = count ( self::find ( $cda ) );
 		$rs = ($count > 0);
 
-		Debug::core ( "Found " . $count . ": CDA: " . self::_cda_to_query_string($CDAArray) );
+		Debug::core ( "Found " . $count . ": CDA: " . self::_cda_to_query_string($cda) );
 		return $rs;
 	}
 
@@ -1393,7 +1398,6 @@ EOM;
 		$array = self::_filterParams ( $array );
 		
 		//var_dump($array);
-
 		if (count ( $array ) == 0) {
 			//Debug::addError('invalid init params array');
 			return false;
@@ -1548,9 +1552,7 @@ EOM;
 	    }
 	    
 	    $has_unique = false;	    
-	    $CDA = self::_tidy_cda_for_query( $CDA , $has_unique);
-
-   
+	    $CDA = self::_tidy_cda_for_query( $CDA , $has_unique);   
 	    $CDS = self::_cda_to_query_string( $CDA );		
 		
 		$sqlForQueryTPL = "SELECT * FROM `" . static::$tableName . "`" . " WHERE " . "1" ;		
@@ -1561,8 +1563,7 @@ EOM;
 		
 		if( !$has_unique && count( $additional_cda ) ) {
 		    if( isset($additional_cda['order'] ) && count( $additional_cda['order'] ) ) {
-		        $orderByString = self::_order_info_to_string( $additional_cda['order'] ) ;
-		        
+		        $orderByString = self::_order_info_to_string( $additional_cda['order'] ) ;		        
 		        $sqlForQueryTPL .= $orderByString;
 			}
 			
@@ -1658,12 +1659,11 @@ EOM;
 		}
 		
 		if( self::isAutoIncrement($fieldName) && intval($value) < 0 ) {
-			Debug::notice('SET NUMBER LESS THAN ZERO FOR A AUTO_INCREMENT KEY, '. $fieldName . ':'. $value );
-			return ;
+			Debug::warning('SET NUMBER LESS THAN ZERO FOR A AUTO_INCREMENT KEY, '. $fieldName . ':'. $value );
+			throw new DBFieldValueCheckException($fieldName, static::$tableName);
 		}
 		
-		if( self::getFieldType($fieldName) === self::TABLE_FIELD_TYPE_NUMERIC ) {
-		    
+		if( self::getFieldType($fieldName) === self::TABLE_FIELD_TYPE_NUMERIC ) {		    
 		    if( !is_numeric($value) ) {
 		          throw new DBFieldValueCheckException($fieldName, static::$tableName);
 		    }
@@ -1695,6 +1695,8 @@ EOM;
 			$this->p [$fieldName] ['value'] = $value;
 			$this->setSaveFlag ( true );
 		}
+		
+		return true;
 	}
 	
 	const DB_FETCH_FLAG_CHECK_FK		= 0x01;
@@ -1799,6 +1801,7 @@ EOM;
 	const DB_OBJECT_IDLE			= 6;
 	
 	private $DBActionStatus = self::DB_OBJECT_IDLE ;
+	private $_e = null;
 	
 	public function getDBActionStatus() {
 		return $this->DBActionStatus;
@@ -1838,7 +1841,9 @@ EOM;
 			}
 		} catch ( \Exception $e ) {
 			$this->updateStatus( self::STATUS_ABNOMAL );
-			throw $e ;
+			$this->DBActionStatus = self::DB_OBJECT_SAVE_FAILED;
+			Debug::exception($e);
+			return false ;
 		}
 		
 		$rs = (bool) $result;

@@ -54,7 +54,7 @@ class MemCacheProvider extends SingletonObject implements CacheProvider,Resource
 			
 		} catch ( ClassNotFoundException $e) {
 			self::$memcache = null;
-			Debug::addException($e) ;
+			Debug::exception($e) ;
 			return null;
 		}
 		

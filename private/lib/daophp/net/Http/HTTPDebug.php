@@ -1,7 +1,7 @@
 <?php
 
 
-namespace daophp\net\Http ;
+namespace daophp\net\http ;
 
 class HTTPDebug extends SingletonObject {
 	
