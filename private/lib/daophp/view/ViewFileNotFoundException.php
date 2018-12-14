@@ -9,7 +9,7 @@ class ViewFileNotFoundException extends FileNotFoundException {
 	public function __construct( $viewName ) {
 
 		$msg = <<< EOM
-View <b>{$viewName}</b> could not be found
+view: <b>{$viewName}</b>
 EOM;
 		parent::__construct( $msg );
 	}

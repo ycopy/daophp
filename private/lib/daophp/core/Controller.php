@@ -38,9 +38,8 @@ use daophp\view\AbstractView;
 use daophp\view\JsonView;
 use daophp\view\NullView;
 
-abstract class Controller extends DPObject {	
-    
-    
+abstract class Controller extends DPObject {
+	
     private $_view = null;
     public function render() {
         if( $this->_view == null ) { return ''; }

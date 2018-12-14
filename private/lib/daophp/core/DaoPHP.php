@@ -504,15 +504,15 @@ final class DaoPHP extends SingletonObject {
 	}
 	
 	public function getModule() {
-		return $this->getRequest()->getModule()  ;
+		return strtolower($this->getRequest()->getModule())  ;
 	}
 	
 	public function getController() {
-		return $this->getRequest()->getController()  ;
+		return strtolower($this->getRequest()->getController())  ;
 	}
 
 	public function getAction() {
-		return $this->getRequest()->getAction()  ;
+		return strtolower($this->getRequest()->getAction())  ;
 	}
 	
 	
@@ -567,8 +567,7 @@ final class DaoPHP extends SingletonObject {
 		//header('Content-Type: text/html; charset="'.$responser->getCharset().'"'); 
 		echo $result;
 		
-		Debug::core( "html: ". "\n". $result );
-		
+		Debug::core( "html: ". "\n". $result );		
 		Debug::core('display end') ;		
 	}
 	

@@ -142,7 +142,7 @@ class View extends AbstractView {
 		if( $this->_path ) {
 		    $viewFilePath = $this->_path. $this->viewName  . $this->viewSuffix ;
 		} else {
-			$viewFilePath = DP_MODULES_DIR . \daophp\core\Daophp::getInstance()->getModule() . DS . 'views' . DS . 'scripts' . DS  . $this->viewName  . $this->viewSuffix ;
+			$viewFilePath = DP_MODULES_DIR . Daophp::getInstance()->getModule() . DS . 'views' . DS . 'scripts' . DS . Daophp::getInstance()->getController(). DS . $this->viewName  . $this->viewSuffix ;
 		}
 
 		Debug::core('include scripts: '.$viewFilePath . ' begin' );
