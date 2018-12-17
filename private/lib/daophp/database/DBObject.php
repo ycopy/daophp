@@ -887,7 +887,18 @@ EOM;
 	public static function hasUnique( array $columns ) {
 
 	    $class = get_called_class();
+	    
+	    if( !isset(self::$uniqueKey[$class] ) ) {
+	    	self::$uniqueKey[$class] = array() ;
+	    	self::initPCache();
+	    }
+	    
+	    //var_dump($class);
+	    //var_dump(self::$uniqueKey);
+	    
 	    $unique_keys = self::$uniqueKey[$class];
+	    
+	    //var_dump($unique_keys);
 	    
 	    assert( is_array($unique_keys) );
 	    
